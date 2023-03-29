@@ -15,7 +15,9 @@ public class JDBCExecutor {
 			Connection connection = dcm.getConnection();
 			EmployeeDAO empDAO = new EmployeeDAO(connection);
 			//create(empDAO);	
-			read(empDAO);
+			//read(empDAO);
+			//update(empDAO);
+			delete(empDAO);
 			
 		}
 		catch(SQLException e) {
@@ -60,5 +62,19 @@ public class JDBCExecutor {
 	public static void read(EmployeeDAO empDAO) throws SQLException{
 		Employee emp = empDAO.findbyID("123456789");
 		System.out.println(emp.toString());
+	}
+	
+	public static void update(EmployeeDAO empDAO) throws SQLException{
+		Employee emp = empDAO.findbyID("123456789");
+		emp.setFname("Jack");
+		emp.setSalary(300000.0);
+		emp = empDAO.update(emp);
+		System.out.println(emp.toString());
+		
+	}
+	public static void delete(EmployeeDAO empDAO) {
+		Employee emp = empDAO.findbyID("1233679");
+		System.out.println(emp);
+		empDAO.delete(emp.getSsn());
 	}
 }

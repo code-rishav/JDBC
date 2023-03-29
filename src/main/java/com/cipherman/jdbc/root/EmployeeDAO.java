@@ -13,6 +13,10 @@ public class EmployeeDAO extends DataAccessObject<Employee> {
 	
 	private static final String GET = "SELECT * FROM EMPLOYEE where ssn=?";
 	
+	private static final String UPDATE = "UPDATE EMPLOYEE set fname=?,salary=? where ssn=?";
+	
+	private static final String DELETE = "DELETE FROM EMPLOYEE WHERE SSN=?";
+	
 	public EmployeeDAO(Connection connection) {
 		super(connection);
 	}
@@ -50,8 +54,19 @@ public class EmployeeDAO extends DataAccessObject<Employee> {
 
 	@Override
 	public Employee update(Employee dto) {
-
-		return null;
+		Employee emp=null;
+		try(PreparedStatement st = this.connection.prepareStatement(UPDATE);){
+			st.setString(1,dto.getFname());
+			st.setDouble(2,dto.getSalary());
+			st.setString(3,dto.getSsn());
+			st.execute();
+			emp = this.findbyID(dto.getSsn());
+			
+		}catch(SQLException e) {
+			e.printStackTrace();
+		}
+		return emp;
+			
 	}
 
 	@Override
@@ -77,6 +92,12 @@ public class EmployeeDAO extends DataAccessObject<Employee> {
 
 	@Override
 	public void delete(String id) {
-		
+		try(PreparedStatement st = this.connection.prepareStatement(DELETE);){
+			st.setString(1, id);
+			st.execute();
+			
+		}catch(SQLException e) {
+			e.printStackTrace();
+		}
 	}
 }
