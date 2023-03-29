@@ -1,6 +1,7 @@
 package com.cipherman.jdbc.root;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.sql.SQLException;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -12,6 +13,8 @@ public class EmployeeDAO extends DataAccessObject<Employee> {
 	private static final String INSERT = "INSERT INTO EMPLOYEE(fname,minit,lname,ssn,bdate,address,sex,salary,super_ssn,dno) VALUES (?,?,?,?,?,?,?,?,?,?)";
 	
 	private static final String GET = "SELECT * FROM EMPLOYEE where ssn=?";
+	
+	private static final String GET_ALL = "SELECT * FROM EMPLOYEE";
 	
 	private static final String UPDATE = "UPDATE EMPLOYEE set fname=?,salary=? where ssn=?";
 	
@@ -48,19 +51,50 @@ public class EmployeeDAO extends DataAccessObject<Employee> {
 
 	@Override
 	public List<Employee> findAll() {
-	
-		return null;
+		List<Employee> employees = new ArrayList<>();
+		try(PreparedStatement st = this.connection.prepareStatement(GET_ALL);){
+			ResultSet rs = st.executeQuery();
+			String employeeId = "";
+			Employee emp = null;
+			while(rs.next()) {
+				String localempId = rs.getString(4);
+				if(localempId!=employeeId) {
+					emp = new Employee();
+					emp.setFname(rs.getString(1));
+					emp.setMinit(rs.getString(2));
+					emp.setLname(rs.getString(3));
+					emp.setSsn(rs.getString(4));
+					emp.setBdate(rs.getDate(5).toString());
+					emp.setAddress(rs.getString(6));
+					emp.setSex(rs.getString(7));
+					emp.setSalary(rs.getDouble(8));
+					emp.setSuper_ssn(rs.getString(9));
+					emp.setDno(rs.getInt(10));
+					employeeId = localempId;
+					employees.add(emp);
+				}
+				
+			}
+		}catch(SQLException e) {
+			e.printStackTrace();
+		}
+		return employees;
 	}
 
 	@Override
 	public Employee update(Employee dto) {
 		Employee emp=null;
+		try {
+			this.connection.setAutoCommit(false);
+		}catch(SQLException e) {
+			e.printStackTrace();
+		}
 		try(PreparedStatement st = this.connection.prepareStatement(UPDATE);){
 			st.setString(1,dto.getFname());
 			st.setDouble(2,dto.getSalary());
 			st.setString(3,dto.getSsn());
 			st.execute();
-			emp = this.findbyID(dto.getSsn());
+			emp = this.findbyID(dto.getSsn()); 
 			
 		}catch(SQLException e) {
 			e.printStackTrace();
@@ -83,8 +117,15 @@ public class EmployeeDAO extends DataAccessObject<Employee> {
 			st.setString(9,dto.getSuper_ssn());
 			st.setInt(10,dto.getDno());
 			st.execute();
+			this.connection.commit();
 		}
 		catch(SQLException e) {
+			try {
+				this.connection.rollback();
+			}
+			catch(SQLException sqle) {
+				sqle.printStackTrace();
+			}
 			e.printStackTrace();
 		}
 		return null;

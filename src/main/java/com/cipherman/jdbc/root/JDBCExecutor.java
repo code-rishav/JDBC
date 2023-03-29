@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.ResultSet;
 import java.sql.Date;
+import java.util.List;
 
 public class JDBCExecutor {
 	
@@ -17,7 +18,8 @@ public class JDBCExecutor {
 			//create(empDAO);	
 			//read(empDAO);
 			//update(empDAO);
-			delete(empDAO);
+			//delete(empDAO);
+			getAll(empDAO);
 			
 		}
 		catch(SQLException e) {
@@ -76,5 +78,12 @@ public class JDBCExecutor {
 		Employee emp = empDAO.findbyID("1233679");
 		System.out.println(emp);
 		empDAO.delete(emp.getSsn());
+	}
+	
+	public static void getAll(EmployeeDAO empDAO) {
+		List<Employee> emps = empDAO.findAll();
+		for(int i=0;i<emps.size();i++) {
+			System.out.println(emps.get(i));
+		}
 	}
 }
